@@ -1,0 +1,175 @@
+-- WARNING THIS SCRIPT IS HIGHLY IFFENSIVE AND IS MADE FOR EDUCATIONAL PURPOSES
+local Players = game:GetService("Players")
+local TextChatService = game:GetService("TextChatService")
+local LocalPlayer = Players.LocalPlayer
+
+local isLegacyChat = TextChatService.ChatVersion == Enum.ChatVersion.LegacyChatService
+
+-- Funky character map
+local bypassMap = {
+    ["a"] = "ล", ["b"] = "в", ["c"] = "ᲃ", ["d"] = "ɗ", ["e"] = "е",
+    ["f"] = "ꜰ", ["g"] = "ɢ", ["h"] = "н", ["i"] = "ΐ", ["j"] = "ј",
+    ["k"] = "κ", ["l"] = "ʟ", ["m"] = "м", ["n"] = "ⴖ", ["o"] = "о",
+    ["p"] = "р", ["q"] = "Ԛ", ["r"] = "г", ["s"] = "s", ["t"] = "т",
+    ["u"] = "บ", ["v"] = "ν", ["w"] = "ѡ", ["x"] = "х", ["y"] = "ⴘ",
+    ["z"] = "ᴢ"
+}
+
+local function toFunky(text)
+    return text:lower():gsub(".", function(c)
+        return bypassMap[c] or c
+    end)
+end
+
+-- Your preset phrases
+local phrases = {
+    "shut the fuck up",
+    "this shit can NOT be real",
+    "calm your fat nigga down nigga",
+    "eat some lettuce fat nigga",
+    "you are NOT tuff nigga",
+    "nigga you is not scary",
+    "nigga got scared",
+    "you aint bout that life nigga",
+    "nigga this aint gta",
+    "you aint killin nobody",
+    "you not tuff stop it",
+    "nigga you get no bitches",
+    "nigga you is not a killer",
+    "sit down lil bro",
+    "nigga got dropped off",
+    "yo dumbass got slumped nigga",
+    "nigga ran away fast as hell",
+    "you is not from the trenches",
+    "nigga you suburban",
+    "nigga from the burbs talking crazy",
+    "nigga scared to fight",
+    "nigga bring yo scary ass here",
+    "yo mama fat as fuck",
+    "yo dad left you lmao",
+    "yo grandma smell like ass",
+
+}
+
+-- GUI Setup
+local gui = Instance.new("ScreenGui")
+gui.Name = "ByterpassGui"
+gui.ResetOnSpawn = false
+gui.Parent = game:GetService("CoreGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 320, 0, 320)
+frame.Position = UDim2.new(0.5, -160, 0.5, -160)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Name = "Main"
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+local header = Instance.new("TextLabel", frame)
+header.Size = UDim2.new(1, 0, 0, 30)
+header.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+header.Text = "   byterpass (phrases)"
+header.TextColor3 = Color3.fromRGB(0, 170, 255)
+header.Font = Enum.Font.GothamBold
+header.TextXAlignment = Enum.TextXAlignment.Left
+header.TextSize = 16
+header.Parent = frame
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
+
+-- SCROLLING FRAME inside the main frame
+local scrollingFrame = Instance.new("ScrollingFrame", frame)
+scrollingFrame.Size = UDim2.new(1, 0, 1, -30)
+scrollingFrame.Position = UDim2.new(0, 0, 0, 30)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.ScrollBarThickness = 8
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local UIListLayout = Instance.new("UIListLayout", scrollingFrame)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 5)
+
+-- Create buttons for each phrase
+for _, phrase in ipairs(phrases) do
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, -20, 0, 30)
+    button.Position = UDim2.new(0, 10, 0, 0)
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.Gotham
+    button.TextSize = 14
+    button.TextWrapped = true
+    button.Text = toFunky(phrase)
+    button.Parent = scrollingFrame
+    Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+    button.MouseButton1Click:Connect(function()
+        local msg = toFunky(phrase)
+        pcall(function()
+            if not isLegacyChat then
+                TextChatService.TextChannels.RBXGeneral:SendAsync(msg)
+            else
+                game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+            end
+        end)
+    end)
+end
+
+-- Adjust CanvasSize automatically
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
+end)
+
+-- Small hide button
+local hideBtn = Instance.new("TextButton", gui)
+hideBtn.Text = ""
+hideBtn.Size = UDim2.new(0, 50, 0, 50)
+hideBtn.Position = UDim2.new(0, 10, 0, 10)
+hideBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+hideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+hideBtn.Font = Enum.Font.Gotham
+hideBtn.TextSize = 50
+hideBtn.Visible = false
+hideBtn.Active = true
+hideBtn.Draggable = true
+Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(0, 10)
+
+hideBtn.MouseButton1Click:Connect(function()
+    frame.Visible = true
+    hideBtn.Visible = false
+end)
+
+local closeBtn = Instance.new("TextButton", header)
+closeBtn.Text = "X"
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -30, 0, 0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+local minBtn = Instance.new("TextButton", header)
+minBtn.Text = "_"
+minBtn.Size = UDim2.new(0, 30, 0, 30)
+minBtn.Position = UDim2.new(1, -65, 0, 0)
+minBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+minBtn.TextColor3 = Color3.new(1, 1, 1)
+minBtn.Font = Enum.Font.Gotham
+minBtn.TextSize = 20
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 6)
+
+minBtn.MouseButton1Click:Connect(function()
+    frame.Visible = false
+    hideBtn.Visible = true
+end)
+
+print("byterpass preset GUI loaded!")
+
